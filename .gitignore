@@ -36,6 +36,7 @@ vite.config.ts.timestamp-*
 /pocket-id
 /data
 /data/*
+/backend/cmd/pocket-id
 
 # Application specific
 data
