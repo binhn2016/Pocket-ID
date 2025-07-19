@@ -30,7 +30,8 @@ func NewWebAuthnService(db *gorm.DB, jwtService *JwtService, auditLogService *Au
 		RPID:          utils.GetHostnameFromURL(common.EnvConfig.AppURL),
 		RPOrigins:     []string{common.EnvConfig.AppURL},
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
-			UserVerification: protocol.VerificationRequired,
+			UserVerification: protocol.VerificationDiscouraged,
+			AuthenticatorAttachment: protocol.CrossPlatform,
 		},
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
@@ -184,7 +185,11 @@ func (s *WebAuthnService) determinePasskeyName(aaguid []byte) string {
 }
 
 func (s *WebAuthnService) BeginLogin(ctx context.Context) (*model.PublicKeyCredentialRequestOptions, error) {
-	options, session, err := s.webAuthn.BeginDiscoverableLogin()
+	options, session, err := s.webAuthn.BeginDiscoverableLogin(
+		webauthn.WithAssertionPublicKeyCredentialHints([]protocol.PublicKeyCredentialHints{
+			protocol.PublicKeyCredentialHintSecurityKey,
+		}),
+	)
 	if err != nil {
 		return nil, err
 	}
